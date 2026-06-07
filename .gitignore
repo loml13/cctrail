@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# macOS
+.DS_Store
+
+# 运行时数据 / 真实留痕 —— 绝不提交
+/conversation-log/
+.pending-response
+.last-compressed
+settings.json
+settings.json.cctrail-bak
+
+# 本地覆盖
+*.local
