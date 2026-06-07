@@ -44,10 +44,11 @@ Claude 回答 ──Stop──▶ log_assistant_response.py
                        └─ 有 .pending-response？取回答摘要追加到同一行下
 
 新会话开始 ──SessionStart──▶ inject_recent_log.py
-                              └─ 读最近 2 个月度文件的末尾 N 行 → 注入上下文
+                              ├─ 长期记忆：近两个月的「历史摘要」(压缩脉络)
+                              └─ 近 5 天：逐条原文 (滤掉监视器噪声) → 注入上下文
 
 到压缩周期 ──▶ hook 提醒 Claude 运行 log-compress skill
-              └─ 7 天前记录浓缩为「历史摘要」，近 7 天原样保留
+              └─ 5 天前记录浓缩为「历史摘要」，近 5 天原样保留
 ```
 
 留痕长这样（见 `examples/conversation-log-sample/`）：
@@ -106,8 +107,12 @@ python3 install.py            # 装到 ~/.claude，自动合并 settings.json（
 |---|---|---|
 | `CCTRAIL_HOME` | `~/.claude/cctrail` | 留痕根目录 |
 | `CCTRAIL_PER_PROJECT` | 关 | 设为 `1` 时按项目 `cwd` 分别记录；默认全局一份流水 |
-| `CCTRAIL_MAX_LINES` | `40` | SessionStart 注入的最大行数 |
 | `CCTRAIL_COMPRESS_DAYS` | `1` | 多少天提醒压缩一次 |
+| `CCTRAIL_RECENT_DAYS` | `5` | 注入「近 N 天」原文窗口；须与 log-compress 原样保留窗口一致 |
+| `CCTRAIL_FILES_BACK` | `2` | 「长期记忆」回看几个月度文件（≈ 近两个月）|
+| `CCTRAIL_LONG_MAX` | `80` | 长期段（历史摘要）注入行数上限 |
+| `CCTRAIL_RECENT_MAX` | `120` | 近 N 天段注入行数上限 |
+| `CCTRAIL_LINE_MAXLEN` | `240` | 单行超长截断字符数 |
 
 寒暄过滤规则、需要剥离的注入标签（如自建 IM 桥接的外壳标签）在
 `hooks/cctrail_common.py` 顶部，按需增删。

@@ -6,8 +6,13 @@
 可用环境变量覆盖：
   CCTRAIL_HOME          留痕根目录（默认 ~/.claude/cctrail）
   CCTRAIL_PER_PROJECT   设为 1 时按项目 cwd 隔离留痕（默认全局一份）
-  CCTRAIL_MAX_LINES     SessionStart 注入的最大行数（默认 40）
   CCTRAIL_COMPRESS_DAYS 压缩触发周期，单位天（默认 1）
+  CCTRAIL_RECENT_DAYS   SessionStart「近 N 天」原文窗口（默认 5；
+                        需与 log-compress 的「原样保留窗口」对齐，注入才无盲区）
+  CCTRAIL_FILES_BACK    「长期记忆」回看几个月度文件（默认 2 ≈ 近两个月）
+  CCTRAIL_LONG_MAX      长期段（历史摘要）注入行数上限（默认 80）
+  CCTRAIL_RECENT_MAX    近 N 天段注入行数上限（默认 120）
+  CCTRAIL_LINE_MAXLEN   单行超长截断字符数（默认 240，防贴大块撑爆注入）
 """
 import os
 import re
@@ -45,8 +50,14 @@ def last_compressed_path(d):
 
 
 # ---- 配置（环境变量可覆盖）----
-MAX_LINES = int(os.environ.get("CCTRAIL_MAX_LINES", "40"))
 COMPRESS_INTERVAL_DAYS = int(os.environ.get("CCTRAIL_COMPRESS_DAYS", "1"))
+
+# SessionStart 注入：长期记忆（历史摘要）+ 近 N 天原文，分两段
+RECENT_DAYS = int(os.environ.get("CCTRAIL_RECENT_DAYS", "5"))
+FILES_BACK = int(os.environ.get("CCTRAIL_FILES_BACK", "2"))
+LONG_MAX_LINES = int(os.environ.get("CCTRAIL_LONG_MAX", "80"))
+RECENT_MAX_LINES = int(os.environ.get("CCTRAIL_RECENT_MAX", "120"))
+LINE_MAXLEN = int(os.environ.get("CCTRAIL_LINE_MAXLEN", "240"))
 
 # 寒暄 / 测试类短消息：仅当整体匹配且长度 <= 12 时过滤，避免误伤真实提问。
 TRIVIAL = re.compile(
