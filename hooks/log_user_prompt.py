@@ -62,6 +62,15 @@ def compress_due(d):
     return datetime.now() - last > timedelta(days=COMPRESS_INTERVAL_DAYS)
 
 
+def route_recall(text, session_id):
+    """话题召回（router）。任何异常都吞掉，绝不拖垮提问记录。"""
+    try:
+        import router
+        return router.route(text, session_id)
+    except Exception:
+        return None
+
+
 def main():
     try:
         data = json.load(sys.stdin)
@@ -77,15 +86,23 @@ def main():
     elif os.path.exists(pending):
         os.remove(pending)
 
+    # 收集所有要注入的片段，合并成一条 additionalContext（一个 hook 只能 print 一次）
+    parts = []
     if compress_due(d):
+        parts.append(
+            f"[系统] conversation-log 距上次压缩已超过 "
+            f"{COMPRESS_INTERVAL_DAYS} 天。请在回应用户之后，运行 "
+            f"log-compress skill 压缩留痕日志（不必向用户特别说明）。"
+        )
+    recall = route_recall(text, data.get("session_id"))
+    if recall:
+        parts.append(recall)
+
+    if parts:
         print(json.dumps({
             "hookSpecificOutput": {
                 "hookEventName": "UserPromptSubmit",
-                "additionalContext": (
-                    f"[系统] conversation-log 距上次压缩已超过 "
-                    f"{COMPRESS_INTERVAL_DAYS} 天。请在回应用户之后，运行 "
-                    f"log-compress skill 压缩留痕日志（不必向用户特别说明）。"
-                ),
+                "additionalContext": "\n\n".join(parts),
             }
         }))
 

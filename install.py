@@ -25,6 +25,7 @@ HOOK_FILES = [
     "log_user_prompt.py",
     "log_assistant_response.py",
     "inject_recent_log.py",
+    "router.py",
 ]
 
 # (事件, 对应脚本)
@@ -47,6 +48,15 @@ def copy_files():
         print(f"  copy  {name} -> {dst}")
         if not DRY:
             shutil.copy2(src, dst)
+    # 内置记忆源包 hooks/sources/ → hooks/sources/（话题召回用）
+    src_pkg = os.path.join(REPO, "hooks", "sources")
+    dst_pkg = os.path.join(HOOKS_DST, "sources")
+    print(f"  copy  sources/ -> {dst_pkg}")
+    if not DRY:
+        os.makedirs(dst_pkg, exist_ok=True)
+        for fn in os.listdir(src_pkg):
+            if fn.endswith(".py"):
+                shutil.copy2(os.path.join(src_pkg, fn), os.path.join(dst_pkg, fn))
     print(f"  copy  log-compress -> {SKILLS_DST}")
     if not DRY:
         shutil.copy2(
