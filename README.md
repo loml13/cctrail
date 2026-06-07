@@ -1,5 +1,7 @@
 # cctrail
 
+中文 · [English](README.en.md)
+
 > 给 Claude Code 一条跨会话的「我让它做过什么」流水线记录 —— 纯 hook，零依赖，不烧 token。
 
 每开一个新会话，Claude Code 都是失忆的：它不知道你昨天让它改了什么、上一个会话停在哪。
@@ -172,9 +174,10 @@ SOURCE = ObsidianSource()
 
 ## 卸载
 
-删掉 `~/.claude/hooks/` 下的四个脚本与 `~/.claude/skills/log-compress/`，
-并从 `~/.claude/settings.json` 移除对应 hook（或直接还原 `settings.json.cctrail-bak`）。
-留痕数据在 `~/.claude/cctrail/`，想留作归档可保留。
+删掉 `~/.claude/hooks/` 下的 cctrail 脚本（`cctrail_common.py` / `log_user_prompt.py` /
+`log_assistant_response.py` / `inject_recent_log.py` / `router.py` 与 `sources/`）和
+`~/.claude/skills/log-compress/`，并从 `~/.claude/settings.json` 移除对应 hook
+（或直接还原 `settings.json.cctrail-bak`）。留痕数据在 `~/.claude/cctrail/`，想留作归档可保留。
 
 ## License
 
